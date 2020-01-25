@@ -36,6 +36,7 @@ Postman has a feature where instead of making use of its default linear workflow
 This is a bit hard to show, but newman is a commandline tool which has being created to help in executing tests in a commandline which makes it possible to add postman test to a CI/CD pipeline.
 #### Html Extra Reports
 Has being used to create a good looking and understandable html report which is customisable 
+[The report can be found here]("https://github.com/Benzito164/Postman/blob/master/Reqres-2020-01-25-13-48-28-026-0.html")
 
 
 
