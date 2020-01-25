@@ -1,0 +1,986 @@
+{
+	"info": {
+		"_postman_id": "cf73ebe0-6aa1-4040-99d6-945f684a2bbc",
+		"name": "Reqres",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GLOBAL SETUP",
+			"item": [
+				{
+					"name": "Global SetUp",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a1868198-0f9b-4f05-a96c-4fb375169c67",
+								"exec": [
+									"var commonTests = () =>{",
+									"  pm.test(\"Status code is 200\", function () {",
+									"    pm.response.to.have.status(200);",
+									"});",
+									"",
+									"pm.test(\"Header should contain content-type\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"});",
+									"",
+									"pm.test(\"Response time is less than 200ms\", function () {",
+									"    pm.expect(pm.response.responseTime).to.be.below(200);",
+									"});",
+									"",
+									"pm.test(\"Content-Type server value is correct\", function () {",
+									"    pm.response.to.have.header(\"Content-Type\");",
+									"    pm.response.to.be.header(\"Server\", \"cloudflare\");",
+									"});",
+									"",
+									"}",
+									"",
+									"pm.environment.set(\"commonTests\",commonTests.toString());",
+									"",
+									"console.log(\"============Global set up complete============\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "This contains variables and reuseable methods that need to be initialised for the entire test suites"
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "8a218863-cbb9-4ec6-a238-a1420101f198",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "a1925eaf-6c7d-41d2-a46c-9e58ba9c1e90",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "GET Tests",
+			"item": [
+				{
+					"name": "GET SETUP",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "ac985708-20b1-46cf-854e-2afe2af298f0",
+								"exec": [
+									"pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
+									"    // Get the values from the response and store them as a variable",
+									"    var firstname = res.json().results[0].name.first",
+									"    var lastname  = res.json().results[0].name.last",
+									"    var email     = res.json().results[0].email",
+									"    var password  = res.json().results[0].login.password",
+									"",
+									"    // Format and save the values as an environment variable to use in the body of the next request",
+									"    pm.environment.set(\"first_name\", JSON.stringify((_.capitalize(firstname))))",
+									"    pm.environment.set(\"last_name\", JSON.stringify((_.capitalize(lastname))))",
+									"    pm.environment.set(\"email\", JSON.stringify((_.capitalize(email))))",
+									"    pm.environment.set(\"password\", JSON.stringify((_.capitalize(password))))",
+									"    console.log(\"Random user api call successfully made\")",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "4ec1a2a3-1e6d-41af-ada9-3c1f2d11eb04",
+								"exec": [
+									"console.log(\"****************Get Test Set Up Complete*************\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get users",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "e40b6ee9-4759-4854-8741-d997e312b7eb",
+								"exec": [
+									"eval(pm.environment.get(\"commonTests\"))();",
+									"",
+									"pm.test(\"test that the number of pages equals 2\", function(){",
+									"    pm.expect(pm.response.json().page).to.eql(2)",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users?page=2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							],
+							"query": [
+								{
+									"key": "page",
+									"value": "2"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "get single user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "63df4bbb-2919-4ded-99e5-82927affca36",
+								"exec": [
+									"",
+									" var jsonData = pm.response.json().data;",
+									"pm.test(\"First name equals\", function () {",
+									"    pm.expect(jsonData.first_name).to.eql(\"Janet\");",
+									"});",
+									"",
+									"pm.test(\"id equals 2\", function(){",
+									"    pm.expect(jsonData.id).to.eql(2);",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "user not found",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f89c6c2b-cacf-4238-a174-fcce473cb4cd",
+								"exec": [
+									"",
+									"pm.test(\"Status code to contain the right values\",function(){",
+									"  pm.response.to.have.status(404);",
+									"  pm.response.to.have.status(\"Not Found\");",
+									"});",
+									""
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "884eb884-45a4-4439-b8e2-d3391d58d5e4",
+								"exec": [
+									"console.log(pm.globals.get('another_global_number'));",
+									"pm.variables.set(\"testName\",\"BENI\");"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users/23",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"23"
+							]
+						},
+						"description": "-This tests that the right status code and status string are returned."
+					},
+					"response": []
+				},
+				{
+					"name": "GET TEARDOWN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "badfca9b-9ba4-44dd-8a06-542dbee80622",
+								"exec": [
+									"console.log(\"****************Get Test Tear Down Complete*************\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "30ae7a65-ec5e-4a14-9b78-f1b27cc16916",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "d4de8e63-c861-4755-831d-a286e1783e42",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "POST Tests",
+			"item": [
+				{
+					"name": "POST SETUP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "fd704644-b46b-4d9d-aa72-0d7a14a14619",
+								"exec": [
+									"console.log(\"****************Post Set Up Complete*************\")"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "f3f1ac58-a71f-450f-a266-faa0b417de0a",
+								"exec": [
+									"var commonPostTest = ()=>{",
+									"    pm.test(\"verify status \",()=>{",
+									"    pm.response.to.have.status(400)",
+									"    pm.response.to.have.status(\"Bad Request\")",
+									"})",
+									"}",
+									"",
+									"pm.environment.set(\"commonPostTest\",commonPostTest.toString())",
+									"",
+									"pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
+									"    // Get the values from the response and store them as a variable",
+									"    var firstname = res.json().results[0].name.first",
+									"    var lastname  = res.json().results[0].name.last",
+									"    var email     = res.json().results[0].email",
+									"    var password  = res.json().results[0].login.password",
+									"",
+									"    // Format and save the values as an environment variable to use in the body of the next request",
+									"    pm.environment.set(\"first_name\", JSON.stringify((_.capitalize(firstname))))",
+									"    pm.environment.set(\"last_name\", JSON.stringify((_.capitalize(lastname))))",
+									"    pm.environment.set(\"email\", JSON.stringify((_.capitalize(email))))",
+									"    pm.environment.set(\"password\", JSON.stringify((_.capitalize(password))))",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Regiser with invalid credentials",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "341f2ba7-d978-4d66-a143-94b8dbd5fe79",
+								"exec": [
+									"",
+									"pm.test(\"verify error key and value\",()=>{",
+									"    pm.expect(pm.response.json()).to.have.key(\"error\")",
+									"    pm.expect(pm.response.json().error).to.be.eql(\"Note: Only defined users succeed registration\")",
+									"})",
+									"",
+									"eval(pm.environment.get(\"commonPostTest\"))();",
+									"",
+									"if (pm.response.to.have.status(400)){",
+									"    postman.setNextRequest(\"Registeration Successful\");",
+									"}"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\t\"email\":{{email}},\n\t\"password\":{{password}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/register",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create user",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "7241686f-a3e7-4ada-88f4-0684b0b13b1e",
+								"exec": [
+									"pm.test(\"Response code equals 201\", function(){",
+									"    pm.response.to.have.status(201);",
+									"    ",
+									"});",
+									"",
+									"pm.test(\"Response to contain created\",()=> pm.response.to.have.status(\"Created\"))",
+									"",
+									"pm.test(\"Response time to be below 200ms\",()=> pm.expect(pm.response.responseTime).to.be.below(200))",
+									"",
+									"pm.test(\"Content header type is correct\",()=> pm.response.to.have.header('Content-Type', 'application/json; charset=utf-8'))",
+									"",
+									"let JsonData = pm.response.json()",
+									"console.log(JsonData.name)",
+									"",
+									"pm.test(\"First name must match \",function(){",
+									"    pm.expect(JsonData.name).to.deep.equal(pm.environment.get(\"first_name\"))",
+									"  ",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "93dc79d0-899c-4c81-b652-69b2cbd96c41",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":{{first_name}},\n    \"job\": {{last_name}}\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "This tests the status code contains 201\nThe header content type is application json \nAsserts the first name returned by the api matches the value passed."
+					},
+					"response": []
+				},
+				{
+					"name": "Registeration Successful",
+					"event": [
+						{
+							"listen": "prerequest",
+							"script": {
+								"id": "228933ca-8fec-4474-ad34-dd21eeb31229",
+								"exec": [
+									"//pm.sendRequest(\"https://randomuser.me/api/\", (err, res) => {",
+									"    // Get the values from the response and store them as a variable",
+									" //   var firstname = res.json().results[0].name.first",
+									" //   var lastname  = res.json().results[0].name.last",
+									" //   var email     = res.json().results[0].email",
+									" //   var password  = res.json().results[0].login.password",
+									"",
+									"    // Format and save the values as an environment variable to use in the body of the next request",
+									" //   pm.environment.set(\"first_name\", JSON.stringify((_.capitalize(firstname))))",
+									" //   pm.environment.set(\"last_name\", JSON.stringify((_.capitalize(lastname))))",
+									" //   pm.environment.set(\"email\", JSON.stringify((_.capitalize(email))))",
+									" //   pm.environment.set(\"password\", JSON.stringify((_.capitalize(password))))",
+									"  ",
+									" //   console.log(\"Finished Executing Post Set up Scripts\")",
+									"//})"
+								],
+								"type": "text/javascript"
+							}
+						},
+						{
+							"listen": "test",
+							"script": {
+								"id": "fe702726-4f8f-4a31-92b4-fab26c9e8fab",
+								"exec": [
+									"var responseData = pm.response.json()",
+									"",
+									"pm.test(\"verify correct id value\",()=>{",
+									"    pm.expect(responseData.id).to.be.eql(4)",
+									"})",
+									"",
+									"pm.test(\"verify correct token value\",()=>{",
+									"    pm.expect(responseData.token).to.be.eql(\"QpwL5tke4Pnpja7X4\")",
+									"})",
+									"",
+									"pm.test(\"verify json to have all keys\",()=>{",
+									"    pm.expect(responseData).to.have.all.keys(\"id\",\"token\")",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n\n    \"email\": \"eve.holt@reqres.in\",\n    \"password\": \"pistol\"\n\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/register",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Registeration Unsuccessful",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "917360f0-556c-4e96-a9e2-758fe5b1eeac",
+								"exec": [
+									"eval(pm.environment.get(\"commonPostTest\"))();",
+									"",
+									"pm.test(\"verify response contains error key and error message\",()=>{",
+									"    pm.expect(pm.response.json()).to.have.key(\"error\")",
+									"    pm.expect(pm.response.json().error).to.be.eql(\"Missing password\")",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"nbhbh@dsjkhgkds\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/register",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Success",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "9a3d0157-8fdf-4026-93ec-bc6face3a746",
+								"exec": [
+									"var responseData = pm.response.json()",
+									"pm.test(\"Response should contain token key and value\",()=>{",
+									"    pm.expect(responseData).to.have.key(\"token\")",
+									"    pm.expect(responseData.token).to.be.eql(\"QpwL5tke4Pnpja7X4\")",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"eve.holt@reqres.in\",\n    \"password\": \"cityslicka\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/login",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Login Unsuccessful",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "d105ffce-a835-4282-b1d5-042a710e2aaa",
+								"exec": [
+									"var responseData = pm.response.json()",
+									"pm.test(\"verify error key and error message\",()=>{",
+									"    pm.expect(responseData).to.have.key(\"error\")",
+									"    pm.expect(responseData.error).to.have.be.eql(\"Missing password\")",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"name": "Content-Type",
+								"value": "application/json",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"peter@klaven\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseurl}}/api/login",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"login"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "POST TEARDOWN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "b32ec0d5-221c-4440-b897-156d3d7b7b2b",
+								"exec": [
+									"console.log(\"****************Post Tear Down Complete*************\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"event": [
+				{
+					"listen": "prerequest",
+					"script": {
+						"id": "e44e5116-465d-47e1-85f1-8e760cc3dbad",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				},
+				{
+					"listen": "test",
+					"script": {
+						"id": "9eb8b31d-feba-4436-85f4-fb3426bf0e7e",
+						"type": "text/javascript",
+						"exec": [
+							""
+						]
+					}
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "PUT Tests",
+			"item": [],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "Delete Tests",
+			"item": [
+				{
+					"name": "DELETE SETUP",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f703968e-f22f-41aa-88da-7edbd2b13e8f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Delete",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f703968e-f22f-41aa-88da-7edbd2b13e8f",
+								"exec": [
+									"pm.test(\"verify status code and message\",()=>{",
+									"    pm.response.to.have.status(204)",
+									"    pm.response.to.have.status(\"No Content\")",
+									"})"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "DELETE TEARDOWN",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "f703968e-f22f-41aa-88da-7edbd2b13e8f",
+								"exec": [
+									""
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "DELETE",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users/2",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users",
+								"2"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
+			"name": "GLOBAL TEARDOWN",
+			"item": [
+				{
+					"name": "Global TearDown",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"id": "a1868198-0f9b-4f05-a96c-4fb375169c67",
+								"exec": [
+									"console.log(\"========Global tear down complete=============\")"
+								],
+								"type": "text/javascript"
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseurl}}/api/users",
+							"host": [
+								"{{baseurl}}"
+							],
+							"path": [
+								"api",
+								"users"
+							]
+						},
+						"description": "This contains all clean up tasks that are required in a collection level."
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"id": "a2ffa563-e57d-41b2-9070-02fe1d5d1d6e",
+				"type": "text/javascript",
+				"exec": [
+					"",
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"id": "080e634d-2139-4a8e-8062-f62ba7aca533",
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"id": "4675f6fc-d298-418e-9311-d20dbd5569d8",
+			"key": "baseurl",
+			"value": "https://reqres.in",
+			"type": "string"
+		}
+	],
+	"protocolProfileBehavior": {}
+}
